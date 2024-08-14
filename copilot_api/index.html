@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Chat Interface</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            margin: 10px;
+            padding: 10px;
+            font-family: sans-serif;
+        }
+
+        #chat-container {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+
+        #chat-output {
+            flex-grow: 1;
+            padding: 10px;
+            overflow-y: scroll;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .message-bubble {
+            margin-bottom: 15px;
+            max-width: 70%;
+            /* Adjust as needed */
+            display: flex;
+            align-items: flex-end;
+            /* Align to the bottom of the bubble */
+        }
+
+        .user-message {
+            justify-content: flex-start;
+            /* Align user messages to the left */
+        }
+
+        .system-message {
+            justify-content: flex-end;
+            /* Align system responses to the right */
+        }
+
+        .message-content {
+            padding: 10px;
+            border-radius: 10px;
+            word-break: break-word;
+            /* Handle long words properly */
+        }
+
+        .user-message .message-content {
+            background-color: #eee;
+            /* Light gray for user messages */
+        }
+
+        .system-message .message-content {
+            background-color: #4CAF50;
+            /* Green for system responses */
+            color: white;
+        }
+
+        #chat-input {
+            display: flex;
+            padding: 10px;
+            position: fixed;
+            bottom: 0;
+            width: 80%;
+            background-color: white;
+        }
+
+        #message-box {
+            flex-grow: 1;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        #send-button {
+            padding: 8px 15px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-left: 10px;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 600px) {
+            #message-box {
+                font-size: 14px;
+            }
+
+            #send-button {
+                padding: 6px 10px;
+                font-size: 14px;
+            }
+
+            .message-bubble {
+                max-width: 90%;
+                /* Adjust bubble width for smaller screens */
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div id="chat-container">
+        <div id="chat-output"></div>
+        <div id="chat-input">
+            <input type="text" id="message-box" placeholder="Enter your message...">
+            <button id="send-button">Send</button>
+        </div>
+    </div>
+
+    <script>
+        window.onload = function () {
+            localStorage.clear();
+        };
+
+        const chatOutput = document.getElementById('chat-output');
+        const messageBox = document.getElementById('message-box');
+        const sendButton = document.getElementById('send-button');
+
+        sendButton.addEventListener('click', sendMessage);
+
+        window.addEventListener('keydown', function (event) {
+            if (event.key === 'Enter') {
+                sendMessage(); // Assuming you have a sendMessage function that handles sending the message
+            }
+        });
+
+        async function sendMessage() {
+            const message = messageBox.value;
+            if (message.trim() === '') return;
+
+            appendMessage('user', message);
+            storeMessage('user', message);
+
+            messageBox.value = '';
+
+            // Disable input and button
+            messageBox.disabled = true;
+            sendButton.disabled = true;
+
+            messageBox.style.opacity = 0.5;
+            sendButton.style.opacity = 0.5;
+
+            messages = localStorage.getItem('messages')
+            console.log(messages)
+
+            tempMessageElement = appendMessage('system', '...');
+            let responseContent = '';
+
+            try {
+                const response = await fetch('/generate', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: localStorage.getItem('messages')
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const reader = response.body.getReader();
+
+                while (true) {
+                    const { done, value } = await reader.read();
+                    if (done) break;
+
+                    const chunk = new TextDecoder().decode(value);
+                    responseContent += chunk;
+                }
+
+                storeMessage('system', responseContent.trim());
+            } catch (error) {
+                console.error('Error during message generation:', error);
+                appendMessage('system', 'An error occurred. Please try again later.');
+            } finally {
+                tempMessageElement.textContent = responseContent
+
+                // Re-enable input and button
+                messageBox.disabled = false;
+                sendButton.disabled = false;
+
+                messageBox.style.opacity = 1;
+                sendButton.style.opacity = 1;
+            }
+        }
+
+        function appendMessage(sender, content) {
+            const messageElement = document.createElement('div');
+            messageElement.classList.add('message-bubble', `${sender}-message`);
+
+            const contentElement = document.createElement('p');
+            contentElement.classList.add('message-content');
+            contentElement.textContent = content;
+
+            messageElement.appendChild(contentElement);
+            chatOutput.appendChild(messageElement);
+            chatOutput.scrollTop = chatOutput.scrollHeight;
+
+            return contentElement
+        }
+
+        function storeMessage(sender, message) {
+            let messages = localStorage.getItem('messages');
+            if (messages) {
+                messages = JSON.parse(messages);
+            } else {
+                messages = [];
+            }
+            messages.push({ role: sender, prompt: message });
+            localStorage.setItem('messages', JSON.stringify(messages));
+        }
+    </script>
+</body>
+
+</html>
