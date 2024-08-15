@@ -1,225 +1,288 @@
 <!DOCTYPE html>
 <html>
-
-<head>
+  <head>
     <title>Chat Interface</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <style>
-        body {
-            margin: 10px;
-            padding: 10px;
-            font-family: sans-serif;
-        }
+      body {
+        margin: 10px;
+        padding: 10px;
+        font-family: sans-serif;
+      }
 
-        #chat-container {
-            display: flex;
-            flex-direction: column;
-            height: 100vh;
-        }
+      #chat-container {
+        display: flex;
+        flex-direction: column;
+        height: 100vh;
+      }
 
-        #chat-output {
-            flex-grow: 1;
-            padding: 10px;
-            overflow-y: scroll;
-            display: flex;
-            flex-direction: column;
-        }
+      #chat-output {
+        flex-grow: 1;
+        padding: 10px;
+        overflow-y: scroll;
+        display: flex;
+        flex-direction: column;
+      }
 
-        .message-bubble {
-            margin-bottom: 15px;
-            max-width: 70%;
-            /* Adjust as needed */
-            display: flex;
-            align-items: flex-end;
-            /* Align to the bottom of the bubble */
-        }
+      .message-bubble {
+        margin-bottom: 15px;
+        max-width: 70%;
+        /* Adjust as needed */
+        display: flex;
+        align-items: flex-end;
+        /* Align to the bottom of the bubble */
+      }
 
-        .user-message {
-            justify-content: flex-start;
-            /* Align user messages to the left */
-        }
+      .user-message {
+        justify-content: flex-start;
+        /* Align user messages to the left */
+      }
 
-        .system-message {
-            justify-content: flex-end;
-            /* Align system responses to the right */
-        }
+      .assistant-message {
+        justify-content: flex-end;
+        /* Align assistant responses to the right */
+      }
 
-        .message-content {
-            padding: 10px;
-            border-radius: 10px;
-            word-break: break-word;
-            /* Handle long words properly */
-        }
+      .message-content {
+        padding: 10px;
+        border-radius: 10px;
+        word-break: break-word;
+        /* Handle long words properly */
+      }
 
-        .user-message .message-content {
-            background-color: #eee;
-            /* Light gray for user messages */
-        }
+      .user-message .message-content {
+        background-color: #eee;
+        /* Light gray for user messages */
+      }
 
-        .system-message .message-content {
-            background-color: #4CAF50;
-            /* Green for system responses */
-            color: white;
-        }
+      .assistant-message .message-content {
+        background-color: #4caf50;
+        /* Green for assistant responses */
+        color: white;
+      }
 
-        #chat-input {
-            display: flex;
-            padding: 10px;
-            position: fixed;
-            bottom: 0;
-            width: 80%;
-            background-color: white;
-        }
+      #chat-input {
+        display: flex;
+        padding: 10px;
+        position: fixed;
+        bottom: 0;
+        width: 80%;
+        background-color: white;
+      }
 
+      #message-box {
+        flex-grow: 1;
+        padding: 8px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+      }
+
+      #send-button {
+        padding: 8px 15px;
+        background-color: #4caf50;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        margin-left: 10px;
+      }
+
+      #image-upload-label {
+        display: inline-block;
+        padding: 8px 15px;
+        background-color: #3498db;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        margin-left: 10px;
+        font-size: 18px;
+      }
+
+      #image-upload-label:hover {
+        background-color: #2980b9;
+      }
+
+      /* Responsive adjustments */
+      @media (max-width: 600px) {
         #message-box {
-            flex-grow: 1;
-            padding: 8px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
+          font-size: 14px;
         }
 
         #send-button {
-            padding: 8px 15px;
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            margin-left: 10px;
+          padding: 6px 10px;
+          font-size: 14px;
         }
 
-        /* Responsive adjustments */
-        @media (max-width: 600px) {
-            #message-box {
-                font-size: 14px;
-            }
-
-            #send-button {
-                padding: 6px 10px;
-                font-size: 14px;
-            }
-
-            .message-bubble {
-                max-width: 90%;
-                /* Adjust bubble width for smaller screens */
-            }
+        .message-bubble {
+          max-width: 90%;
+          /* Adjust bubble width for smaller screens */
         }
+      }
     </style>
-</head>
+  </head>
 
-<body>
+  <body>
     <div id="chat-container">
-        <div id="chat-output"></div>
-        <div id="chat-input">
-            <input type="text" id="message-box" placeholder="Enter your message...">
-            <button id="send-button">Send</button>
-        </div>
+      <div id="chat-output"></div>
+      <div id="chat-input">
+        <input
+          type="text"
+          id="message-box"
+          placeholder="Enter your message..."
+        />
+        <button id="send-button">Send</button>
+        <!-- <label for="image-upload" id="image-upload-label">
+          <input
+            type="file"
+            id="image-upload"
+            accept="image/*"
+            style="display: none"
+          />
+          📷
+        </label> -->
+      </div>
     </div>
 
     <script>
-        window.onload = function () {
-            localStorage.clear();
-        };
+      window.onload = function () {
+        localStorage.clear();
+      };
 
-        const chatOutput = document.getElementById('chat-output');
-        const messageBox = document.getElementById('message-box');
-        const sendButton = document.getElementById('send-button');
+      const chatOutput = document.getElementById("chat-output");
+      const messageBox = document.getElementById("message-box");
+      const sendButton = document.getElementById("send-button");
+    //   const imageUpload = document.getElementById("image-upload");
 
-        sendButton.addEventListener('click', sendMessage);
+      sendButton.addEventListener("click", sendMessage);
 
-        window.addEventListener('keydown', function (event) {
-            if (event.key === 'Enter') {
-                sendMessage(); // Assuming you have a sendMessage function that handles sending the message
-            }
+      window.addEventListener("keydown", function (event) {
+        if (event.key === "Enter") {
+          sendMessage(); // Assuming you have a sendMessage function that handles sending the message
+        }
+      });
+
+    //   imageUpload.addEventListener("change", sendImage);
+
+      async function sendImage() {
+
+        const file = event.target.files[0];
+        if (!file) return;
+
+        const formData = new FormData();
+        formData.append("image", file);
+
+        await handleMessage('Describe this image', async () => {
+          const response = await fetch("/upload_image", {
+            method: "POST",
+            body: formData,
+          });
+
+          return response;
         });
 
-        async function sendMessage() {
-            const message = messageBox.value;
-            if (message.trim() === '') return;
+        // Clear the file input
+        event.target.value = "";
+      }
 
-            appendMessage('user', message);
-            storeMessage('user', message);
+      async function sendMessage() {
+        const message = messageBox.value;
 
-            messageBox.value = '';
+        await handleMessage(message, async () => {
+          const response = await fetch("/generate", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: localStorage.getItem("messages"),
+          });
 
-            // Disable input and button
-            messageBox.disabled = true;
-            sendButton.disabled = true;
+          return response;
+        });
+      }
 
-            messageBox.style.opacity = 0.5;
-            sendButton.style.opacity = 0.5;
+      async function handleMessage(message, generator) {
+        if (message.trim() === "") return;
 
-            messages = localStorage.getItem('messages')
-            console.log(messages)
+        appendMessage("user", message);
+        storeMessage("user", message);
 
-            tempMessageElement = appendMessage('system', '...');
-            let responseContent = '';
+        messageBox.value = "";
 
-            try {
-                const response = await fetch('/generate', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: localStorage.getItem('messages')
-                });
+        // Disable input and button
+        messageBox.disabled = true;
+        sendButton.disabled = true;
 
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
+        messageBox.style.opacity = 0.5;
+        sendButton.style.opacity = 0.5;
 
-                const reader = response.body.getReader();
+        messages = localStorage.getItem("messages");
+        console.log(messages);
 
-                while (true) {
-                    const { done, value } = await reader.read();
-                    if (done) break;
+        tempMessageElement = appendMessage("assistant", "...");
+        let responseContent = "";
 
-                    const chunk = new TextDecoder().decode(value);
-                    responseContent += chunk;
-                }
+        try {
+          const response = await generator();
 
-                storeMessage('system', responseContent.trim());
-            } catch (error) {
-                console.error('Error during message generation:', error);
-                appendMessage('system', 'An error occurred. Please try again later.');
-            } finally {
-                tempMessageElement.textContent = responseContent
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
 
-                // Re-enable input and button
-                messageBox.disabled = false;
-                sendButton.disabled = false;
+          const reader = response.body.getReader();
 
-                messageBox.style.opacity = 1;
-                sendButton.style.opacity = 1;
-            }
+          while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+
+            const chunk = new TextDecoder().decode(value);
+            responseContent += chunk;
+          }
+
+          storeMessage("assistant", responseContent.trim());
+        } catch (error) {
+          console.error("Error during message generation:", error);
+          appendMessage(
+            "assistant",
+            "An error occurred. Please try again later."
+          );
+        } finally {
+          tempMessageElement.textContent = responseContent;
+
+          // Re-enable input and button
+          messageBox.disabled = false;
+          sendButton.disabled = false;
+
+          messageBox.style.opacity = 1;
+          sendButton.style.opacity = 1;
         }
+      }
 
-        function appendMessage(sender, content) {
-            const messageElement = document.createElement('div');
-            messageElement.classList.add('message-bubble', `${sender}-message`);
+      function appendMessage(sender, content) {
+        const messageElement = document.createElement("div");
+        messageElement.classList.add("message-bubble", `${sender}-message`);
 
-            const contentElement = document.createElement('p');
-            contentElement.classList.add('message-content');
-            contentElement.textContent = content;
+        const contentElement = document.createElement("p");
+        contentElement.classList.add("message-content");
+        contentElement.textContent = content;
 
-            messageElement.appendChild(contentElement);
-            chatOutput.appendChild(messageElement);
-            chatOutput.scrollTop = chatOutput.scrollHeight;
+        messageElement.appendChild(contentElement);
+        chatOutput.appendChild(messageElement);
+        chatOutput.scrollTop = chatOutput.scrollHeight;
 
-            return contentElement
+        return contentElement;
+      }
+
+      function storeMessage(sender, message) {
+        let messages = localStorage.getItem("messages");
+        if (messages) {
+          messages = JSON.parse(messages);
+        } else {
+          messages = [];
         }
-
-        function storeMessage(sender, message) {
-            let messages = localStorage.getItem('messages');
-            if (messages) {
-                messages = JSON.parse(messages);
-            } else {
-                messages = [];
-            }
-            messages.push({ role: sender, prompt: message });
-            localStorage.setItem('messages', JSON.stringify(messages));
-        }
+        messages.push({ role: sender, prompt: message });
+        localStorage.setItem("messages", JSON.stringify(messages));
+      }
     </script>
-</body>
-
+  </body>
 </html>

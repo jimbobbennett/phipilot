@@ -11,7 +11,11 @@ python = "^3.11"
 ollama = "~0.3.0"
 fastapi = "~0.111.1"
 uvicorn = {extras = ["standard"], version = "^0.30.3"}
+llama-cpp-python = "^0.2.88"
+huggingface-hub = "^0.24.5"
 
+[tool.poetry.dev-dependencies]
+black = "^23.3.0"
 
 [build-system]
 requires = ["poetry-core"]
@@ -19,3 +23,6 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry.scripts]
 start = "copilot_api.main:start"
+
+[tool.black]
+line-length = 150

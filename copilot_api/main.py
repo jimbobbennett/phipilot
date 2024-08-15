@@ -1,45 +1,89 @@
+import io
 from typing import List
 import ollama
 import uvicorn
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, File, HTTPException, UploadFile
 from fastapi.responses import FileResponse, StreamingResponse
 from pydantic import BaseModel
 
+MODEL = "phi3"
+
 app = FastAPI()
+
 
 class PromptRequest(BaseModel):
     role: str
     prompt: str
 
+
 @app.get("/")
 async def root():
     return FileResponse("copilot_api/index.html")
 
+
+@app.post("/upload_image")
+async def upload_image(image: UploadFile = File(...)) -> StreamingResponse:
+    print("image uploaded")
+
+    # Read the image file
+    image_content = await image.read()
+
+    # Encode the image to base64
+    import base64
+
+    image_base64 = base64.b64encode(image_content).decode("utf-8")
+
+    print(f"image length {len(image_base64)}")
+
+    # Prepare the prompt for Ollama
+    prompt = "Describe this image:"
+
+    try:
+        # Send the request to Ollama using the SDK
+        stream = ollama.generate(model=MODEL, prompt=prompt, images=[image_base64], stream=True)
+
+        async def llm_streamer(llm_stream):
+            for chunk in llm_stream:
+                print(chunk["response"], end="")
+                # print the type of chunk
+
+                yield chunk["response"]
+
+        return StreamingResponse(llm_streamer(stream), media_type="text/event-stream")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 @app.post("/generate")
 async def generate_response(request: List[PromptRequest]) -> StreamingResponse:
     print()
-    print(f'Recieved message: {request[-1].prompt}')
+    print(f"Received message: {request[-1].prompt}")
     try:
         messages = []
-        messages.append({'role': 'system', 'content': 'You are a helpful assistant call Pi ready to help with any task. You are happy and enthusiastic, but your answers are short and to the point.'})
+        messages.append(
+            {
+                "role": "system",
+                "content": "You are a helpful assistant call Pi ready to help with any task. You are happy and enthusiastic, but your answers are short and to the point.",
+            }
+        )
 
         for p in request:
-            messages.append({'role': p.role, 'content': p.prompt})
+            messages.append({"role": p.role, "content": p.prompt})
 
         stream = ollama.chat(
-            model='phi3',
+            model=MODEL,
             messages=messages,
-            stream=True, 
+            stream=True,
         )
 
         async def llm_streamer(llm_stream):
             for chunk in llm_stream:
-                print(chunk['message']['content'], end='')
+                print(chunk["message"]["content"], end="")
                 # print the type of chunk
 
-                yield chunk['message']['content']
-        
-        return StreamingResponse(llm_streamer(stream), media_type='text/event-stream')
+                yield chunk["message"]["content"]
+
+        return StreamingResponse(llm_streamer(stream), media_type="text/event-stream")
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -47,6 +91,7 @@ async def generate_response(request: List[PromptRequest]) -> StreamingResponse:
 def main():
     print("Hello World")
     uvicorn.run(app, host="0.0.0.0", port=8000, reload=True, workers=2)
+
 
 def start():
     """Launched with `poetry run start` at root level"""
