@@ -1,4 +1,4 @@
-# Phi Pilot
+# PhiPilot
 
 PhiPilot allows you to run [Microsoft Phi](https://azure.microsoft.com/products/phi-3) on a Raspberry Pi to bring a local SLM (Small language model) to your home network for privacy or IoT projects.
 
@@ -55,6 +55,53 @@ To run this project:
     ```bash
     poetry run start
     ```
+
+## Use the PhiPilot
+
+### Generate a response
+
+The PhiPilot has a REST API you can access to query the SLM. this is available at `/generate`. This takes a JSON body containing the prompt as a series of messages with roles:
+
+```json
+[
+  {
+    "role": "user",
+    "message": "What is the capital of England?"
+  }
+]
+```
+
+The supported roles are:
+
+- `"user"`
+- `"assistant"`
+
+You can send multiple messages to build up a conversation - sending questions and responses. For example:
+
+```json
+[
+  {
+    "role": "user",
+    "message": "What is the capital of England? Just give the city name"
+  },
+  {
+    "role": "assistant",
+    "message": "The capital of England is London"
+  },
+  {
+    "role": "user",
+    "message": "What is the climate like there in the summer?"
+  }
+]
+```
+
+The PhiPilot is stateless - it doesn't have memory to allow you to easily start a new chat with no former context. It is up to the calling code to implement this.
+
+### UI
+
+The PhiPilot also has a simple chat UI available at `/`. This can be accessed through a browser and supports a chat with memory. You can reset the chat by refreshing the page.
+
+## Advanced options
 
 ### Run this project on device startup
 
