@@ -87,22 +87,6 @@
         margin-left: 10px;
       }
 
-      #image-upload-label {
-        display: inline-block;
-        padding: 8px 15px;
-        background-color: #3498db;
-        color: white;
-        border: none;
-        border-radius: 5px;
-        cursor: pointer;
-        margin-left: 10px;
-        font-size: 18px;
-      }
-
-      #image-upload-label:hover {
-        background-color: #2980b9;
-      }
-
       /* Responsive adjustments */
       @media (max-width: 600px) {
         #message-box {
@@ -132,15 +116,6 @@
           placeholder="Enter your message..."
         />
         <button id="send-button">Send</button>
-        <!-- <label for="image-upload" id="image-upload-label">
-          <input
-            type="file"
-            id="image-upload"
-            accept="image/*"
-            style="display: none"
-          />
-          📷
-        </label> -->
       </div>
     </div>
 
@@ -152,7 +127,6 @@
       const chatOutput = document.getElementById("chat-output");
       const messageBox = document.getElementById("message-box");
       const sendButton = document.getElementById("send-button");
-    //   const imageUpload = document.getElementById("image-upload");
 
       sendButton.addEventListener("click", sendMessage);
 
@@ -161,29 +135,6 @@
           sendMessage(); // Assuming you have a sendMessage function that handles sending the message
         }
       });
-
-    //   imageUpload.addEventListener("change", sendImage);
-
-      async function sendImage() {
-
-        const file = event.target.files[0];
-        if (!file) return;
-
-        const formData = new FormData();
-        formData.append("image", file);
-
-        await handleMessage('Describe this image', async () => {
-          const response = await fetch("/upload_image", {
-            method: "POST",
-            body: formData,
-          });
-
-          return response;
-        });
-
-        // Clear the file input
-        event.target.value = "";
-      }
 
       async function sendMessage() {
         const message = messageBox.value;
