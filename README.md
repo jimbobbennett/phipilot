@@ -6,33 +6,51 @@ PhiPilot allows you to run [Microsoft Phi](https://azure.microsoft.com/products/
 
 You can run this project on any device that can run Python, such as your laptop, but the goal here is to provide an implementation to run on a headless Raspberry Pi.
 
+### Hardware
+
+For the Raspberry Pi, you will need:
+
+- Ideally a Raspberry Pi 5 as this is CPU intensive
+- 8GB RAM
+- Ideally an SSD instead of an SD card
+
+Your Raspberry Pi should have the latest Raspberry Pi OS with all the relevant updates. You don't need the desktop version, the lite version is fine.
+
+### Software
+
 To run this project:
 
-- On your Raspberry Pi, install [Ollama](https://ollama.com/download/linux) with the following command:
+1. On your Raspberry Pi, install [Ollama](https://ollama.com/download/linux) with the following command:
 
     ```bash
     curl -fsSL https://ollama.com/install.sh | sh
     ```
 
-- Install [Poetry](https://python-poetry.org) with the following command:
+1. Download the Phi-3 model from Ollama:
+
+    ```bash
+    ollama pull phi3
+    ```
+
+1. Install [Poetry](https://python-poetry.org) with the following command:
 
     ```bash
     curl -sSL https://install.python-poetry.org | python3 -
     ```
 
-- Clone this repo
+1. Clone this repo
 
     ```bash
     git clone https://github.com/jimbobbennett/phipilot
     ```
 
-- Change to the repo directory
+1. Change to the repo directory
 
     ```bash
     cd phipilot
     ```
 
-- Run the app using Poetry
+1. Run the app using Poetry
 
     ```bash
     poetry run start
@@ -78,6 +96,12 @@ This will now run, and restart when you reboot the Pi.
 ### Access Phipilot over the internet
 
 If you want to access your PhiPilot remotely over the internet, you can use [Ngrok](https://ngrok.com).
+
+## Microsoft Phi-3
+
+Phi-3 is an SML (described [below](#what-is-a-slm)) that is small enough to run on a Raspberry Pi. It has 3.82B parameters, is 2.2GB in size and can easily run on an 8GB Raspberry Pi. It is on par with GPT-3.5, and outperforms Gemini 1.0 on a number of popular benchmarks.
+
+You can read more about this model on the [Ollama Phi-3 model page](https://ollama.com/library/phi3).
 
 ## What is a SLM?
 
