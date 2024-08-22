@@ -6,7 +6,7 @@ from fastapi import FastAPI, File, HTTPException, UploadFile
 from fastapi.responses import FileResponse, StreamingResponse
 from pydantic import BaseModel
 
-MODEL = "phi3:medium-128k"
+MODEL = "phi3"
 
 app = FastAPI()
 
@@ -19,6 +19,39 @@ class PromptRequest(BaseModel):
 @app.get("/")
 async def root():
     return FileResponse("copilot_api/index.html")
+
+
+@app.post("/upload_image")
+async def upload_image(image: UploadFile = File(...)) -> StreamingResponse:
+    print("image uploaded")
+
+    # Read the image file
+    image_content = await image.read()
+
+    # Encode the image to base64
+    import base64
+
+    image_base64 = base64.b64encode(image_content).decode("utf-8")
+
+    print(f"image length {len(image_base64)}")
+
+    # Prepare the prompt for Ollama
+    prompt = "Describe this image:"
+
+    try:
+        # Send the request to Ollama using the SDK
+        stream = ollama.generate(model=MODEL, prompt=prompt, images=[image_base64], stream=True)
+
+        async def llm_streamer(llm_stream):
+            for chunk in llm_stream:
+                print(chunk["response"], end="")
+                # print the type of chunk
+
+                yield chunk["response"]
+
+        return StreamingResponse(llm_streamer(stream), media_type="text/event-stream")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 @app.post("/generate")
